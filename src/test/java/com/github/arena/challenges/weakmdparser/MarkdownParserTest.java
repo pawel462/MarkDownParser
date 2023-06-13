@@ -16,7 +16,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void normalTextAsAParagraph() {
+    void normalTextAsAParagraph() {
         String input = "This will be a paragraph";
         String expected = "<p>This will be a paragraph</p>";
 
@@ -24,7 +24,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void italics() {
+    void italics() {
         String input = "_This will be italic_";
         String expected = "<p><em>This will be italic</em></p>";
 
@@ -32,7 +32,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void boldText() {
+    void boldText() {
         String input = "__This will be bold__";
         String expected = "<p><strong>This will be bold</strong></p>";
 
@@ -40,7 +40,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void normalItalicsAndBoldText() {
+    void normalItalicsAndBoldText() {
         String input = "This will _be_ __mixed__";
         String expected = "<p>This will <em>be</em> <strong>mixed</strong></p>";
 
@@ -48,7 +48,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void withH1HeaderLevel() {
+    void withH1HeaderLevel() {
         String input = "# This will be an h1";
         String expected = "<h1>This will be an h1</h1>";
 
@@ -56,7 +56,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void withH2HeaderLevel() {
+    void withH2HeaderLevel() {
         String input = "## This will be an h2";
         String expected = "<h2>This will be an h2</h2>";
 
@@ -64,7 +64,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void withH6HeaderLevel() {
+    void withH6HeaderLevel() {
         String input = "###### This will be an h6";
         String expected = "<h6>This will be an h6</h6>";
 
@@ -72,7 +72,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void unorderedLists() {
+    void unorderedLists() {
         String input = "* Item 1\n* Item 2";
         String expected = "<ul><li>Item 1</li><li>Item 2</li></ul>";
 
@@ -80,7 +80,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void aLittleBitOfEverything() {
+    void aLittleBitOfEverything() {
         String input = "# Header!\n* __Bold Item__\n* _Italic Item_";
         String expected = "<h1>Header!</h1><ul><li><strong>Bold Item</strong></li><li><em>Italic Item</em></li></ul>";
 
@@ -88,7 +88,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void markdownSymbolsInTheHeaderShouldNotBeInterpreted() {
+    void markdownSymbolsInTheHeaderShouldNotBeInterpreted() {
         String input = "# This is a header with # and * in the text";
         String expected = "<h1>This is a header with # and * in the text</h1>";
 
@@ -96,7 +96,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void markdownSymbolsInTheListItemTextShouldNotBeInterpreted() {
+    void markdownSymbolsInTheListItemTextShouldNotBeInterpreted() {
         String input = "* Item 1 with a # in the text\n* Item 2 with * in the text";
         String expected = "<ul><li>Item 1 with a # in the text</li><li>Item 2 with * in the text</li></ul>";
 
@@ -104,7 +104,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void markdownSymbolsInTheParagraphTextShouldNotBeInterpreted() {
+    void markdownSymbolsInTheParagraphTextShouldNotBeInterpreted() {
         String input = "This is a paragraph with # and * in the text";
         String expected = "<p>This is a paragraph with # and * in the text</p>";
 
@@ -112,7 +112,7 @@ class MarkdownParserTest {
     }
 
     @Test
-    public void markdownUnorderedListsCloseProperlyWithPrecedingAndFollowingLines() {
+    void markdownUnorderedListsCloseProperlyWithPrecedingAndFollowingLines() {
         String input = "# Start a list\n* Item 1\n* Item 2\nEnd a list";
         String expected = "<h1>Start a list</h1><ul><li>Item 1</li><li>Item 2</li></ul><p>End a list</p>";
 

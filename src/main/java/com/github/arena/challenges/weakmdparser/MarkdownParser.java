@@ -1,80 +1,100 @@
 package com.github.arena.challenges.weakmdparser;
 
+import java.util.Optional;
+
 public class MarkdownParser {
 
-    String parse(String markdown) {
+    private static final String REGEX_LI = "(<li>).*";
+    private static final String REGEX_H = "(<h).*";
+    private static final String REGEX_P = "(<p>).*";
+    private static final String UL1 = "</ul>";
+    private static final String P = "<p>";
+    private static final String P1 = "</p>";
+    private static final String LI = "<li>";
+    private static final String LI1 = "</li>";
+    private static final String LOOKING_FOR = "__(.+)__";
+    private static final String LOOKING_FOR1 = "_(.+)_";
+    private static final String STRONG_1_STRONG = "<strong>$1</strong>";
+    private static final String EM_1_EM = "<em>$1</em>";
+    private static final String UL = "<ul>";
+
+
+    public String parse(String markdown) {
         String[] lines = markdown.split("\n");
-        String result = "";
+        StringBuilder result = new StringBuilder();
         boolean activeList = false;
-
-        for (int i = 0; i < lines.length; i++) {
-
-            String theLine = ph(lines[i]);
-
-            if (theLine == null) {
-                theLine = li(lines[i]);
-            }
-
-            if (theLine == null) {
-                theLine = p(lines[i]);
-            }
-
-            if (theLine.matches("(<li>).*") && !theLine.matches("(<h).*") && !theLine.matches("(<p>).*") && !activeList) {
-                activeList = true;
-                result = result + "<ul>";
-                result = result + theLine;
-            } else if (!theLine.matches("(<li>).*") && activeList) {
-                activeList = false;
-                result = result + "</ul>";
-                result = result + theLine;
-            } else {
-                result = result + theLine;
-            }
-        }
-
-        if (activeList) {
-            result = result + "</ul>";
-        }
-
-        return result;
+        return getParserString(lines, result, activeList);
     }
 
-    protected String ph(String markdown) {
-        int count = 0;
-
-        for (int i = 0; i < markdown.length() && markdown.charAt(i) == '#'; i++) {
-            count++;
-        }
-
-        if (count == 0) {
-            return null;
-        }
-
-        return "<h" + Integer.toString(count) + ">" + markdown.substring(count + 1) + "</h" + Integer.toString(count) + ">";
-    }
-
-    public String li(String markdown) {
+    private Optional<String> isListItem(String markdown) {
         if (markdown.startsWith("*")) {
             String skipAsterisk = markdown.substring(2);
             String listItemString = parseSomeSymbols(skipAsterisk);
-            return "<li>" + listItemString + "</li>";
+            return Optional.of(LI +
+                    listItemString +
+                    LI1);
         }
-
-        return null;
+        return Optional.empty();
     }
 
-    public String p(String markdown) {
-        return "<p>" + parseSomeSymbols(markdown) + "</p>";
+    private Optional<String> isParagraph(String markdown) {
+        return Optional.of(P +
+                parseSomeSymbols(markdown) +
+                P1);
     }
 
-    public String parseSomeSymbols(String markdown) {
+    private String parseSomeSymbols(String markdown) {
+        String workingOn = markdown.replaceAll(LOOKING_FOR, STRONG_1_STRONG);
+        return workingOn.replaceAll(LOOKING_FOR1, EM_1_EM);
+    }
 
-        String lookingFor = "__(.+)__";
-        String update = "<strong>$1</strong>";
-        String workingOn = markdown.replaceAll(lookingFor, update);
+    private Optional<String> isHeader(String markdown) {
+        int count = 0;
+        for (int i = 0; i < markdown.length() && markdown.charAt(i) == '#'; i++) {
+            count++;
+        }
+        return count == 0 ? Optional.empty() :
+                Optional.of("<h" + count + ">" +
+                markdown.substring(count + 1) +
+                "</h" + count + ">");
+    }
 
-        lookingFor = "_(.+)_";
-        update = "<em>$1</em>";
-        return workingOn.replaceAll(lookingFor, update);
+    private String getParserString(String[] lines, StringBuilder result, boolean activeList) {
+        activeList = parserString(lines, result, activeList);
+        StringBuilder stringBuilder = activeList ? result.append(UL1) : result;
+        return stringBuilder.toString();
+    }
+
+    private boolean parserString(String[] lines, StringBuilder result, boolean activeList) {
+        for (String line : lines) {
+            Optional<String> theLine = isHeader(line);
+            theLine = theLine.isEmpty() ? isListItem(line) : theLine;
+            theLine = theLine.isEmpty() ? isParagraph(line) : theLine;
+            activeList = theLine.isPresent() &&
+                    isActiveList(result, activeList, theLine.get());
+        }
+        return activeList;
+    }
+
+    private static boolean isActiveList(StringBuilder result, boolean activeList, String theLine) {
+        if (isRegexMatches(activeList, theLine)) {
+            activeList = true;
+            result.append(UL)
+                    .append(theLine);
+        } else if (!theLine.matches(REGEX_LI) && activeList) {
+            activeList = false;
+            result.append(UL1)
+                    .append(theLine);
+        } else {
+            result.append(theLine);
+        }
+        return activeList;
+    }
+
+    private static boolean isRegexMatches(boolean activeList, String theLine) {
+        return theLine.matches(REGEX_LI) &&
+                !theLine.matches(REGEX_H) &&
+                !theLine.matches(REGEX_P) &&
+                !activeList;
     }
 }
